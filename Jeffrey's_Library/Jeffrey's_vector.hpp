@@ -1,7 +1,7 @@
 #include<iostream>
 using namespace std;
 
-template<typename T>
+template<class T>
 class vector {
     private:
         int s = 0;
@@ -35,6 +35,7 @@ class vector {
             s = 0;
             c = 0;
         }
+        //各个成员函数
         int size() {    //返回数组的大小
             return s;
         }
@@ -47,6 +48,7 @@ class vector {
         bool empty() {  //返回数组是否为空
             return s == 0;
         }
+        //返回某些特定的值
         T front() {
             return buffer[0];
         }
@@ -56,6 +58,7 @@ class vector {
         T at(int index) {   //返回数组中index下标的数据
             return buffer[index];
         }
+        //其他操作
         void assign(int n, T elem) {
             buffer = new T[n];
             s = n;
@@ -86,7 +89,7 @@ class vector {
                 buffer[i+1] = buffer[i];
             buffer[index] = element;
         }
-        void insert(int index, int n, int element) {
+        void insert(int index, int n, T element) {
             T* temp = new T[s];
             for(int i=0; i<s; i++) 
                 temp[i] = buffer[i];
@@ -195,6 +198,7 @@ class vector {
             }
             return buffer[i];
         }
+        //对赋值运算符进行重载
         //对逻辑相等运算符进行重载
         bool operator==(vector<T> v) {
             for(int i=0; i<v.size(); i++)
