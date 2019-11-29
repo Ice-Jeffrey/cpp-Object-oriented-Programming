@@ -275,13 +275,24 @@ public:
 	void clear() {
 		DestroyTree(avl_tree);
 	}
+	Node* lower_bound(Key aKey) {
+		Node* temp = Find(aKey);
+		return temp;
+	}
+	Node* upper_bound(Key aKey) {
+		Node* temp = Find(aKey);
+		if (temp != nullptr)
+			return temp->rchild;
+		else
+			return nullptr;
+	}
 	//重载赋值运算符
-	Value operator[](Key aKey) {
+	Value& operator[](Key aKey) {
 		Node* p = Find(aKey);
 		if (p != nullptr)
 			return p->key_value.second;
-		else
-			return 0;
+		else {
+			return -1;
+		}
 	}
-	
 };
