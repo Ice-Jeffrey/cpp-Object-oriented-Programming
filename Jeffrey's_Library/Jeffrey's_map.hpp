@@ -1,3 +1,4 @@
+#pragma once
 #include<iostream>
 #include<stack>
 using namespace std;
@@ -50,8 +51,7 @@ class map {
         int LRAdjust(Node *&p) {
             LRotate(p->lchild);
             RRotate(p);
-            switch (p->balance)
-            {
+            switch (p->balance) {
                 case 1:
                     p->lchild->balance = 0;
                     p->rchild->balance = -1;
@@ -68,8 +68,7 @@ class map {
             p->balance = 0;
             return 0;
         }
-        int RLAdjust(Node *&p)
-        {
+        int RLAdjust(Node *&p) {
             RRotate(p->rchild);
             LRotate(p);
             switch (p->balance)
@@ -95,12 +94,12 @@ class map {
         map() {
             number = 0;
         }
-        T BSTSearch(Key aKey) {
+        Node* BSTSearch(Key aKey) {
             Node *p = avl_tree;
             while (p != NULL && p->key != aKey) {
-                p = aKey < p->key ? p->lchild : p->rchild;
+                p = aKey < p->key_value.first ? p->lchild : p->rchild;
             }
-            return p->key_value.second();
+            return p;
         }
         int Insert(pair<key, T> e) {
             Node **p = &avl_tree;
@@ -155,35 +154,110 @@ class map {
             }
             return 0;
         }
+        //删除某个key对应的键值对
         int erase(Key aKey) {
-            // 定位被删除结点
             Node **p = &avl_tree;
-            while (*p != nullptr && (*p)->key_value != aKey)
-                p = aKey < (*p)->key_value.first ? &(*p)->lchild : &(*p)->rchild;
-            if (*p == nullptr) return 1; // 保存待删除的结点
-            Node *willRemove = *p;
-            if ((*p)->lchild == nullptr)
-                // 如果没有左子，直接用右子结点替换被删除结点
-                *p = (*p)->rchild;
-            else if ((*p)->rchild == nullptr)
-                // 如果没有右子，直接用左子结点替换被删除结点
-                *p = (*p)->lchild;
-            else {
-                // 找到右子的最左结点
-                Node **q = &((*p)->rchild);
-                while ((*q)->lchild != nullptr)
-                    *q = (*q)->lchild;
-                // 用右子最左结点的右子替换右子最左结点
-                Node *temp = *q;
-                *q = (*q)->rchild;
-                // 用右子最左结点替换被删除结点
-                temp->lchild = (*p)->lchild;
-                temp->rchild = (*p)->rchild;
-                *p = temp;
+            stack<pair<Node **, int>> ancestors;
+
+            //第一步：寻找对应的键
+            while (*p != nullptr) {
+                if (e.first < (*p)->key_value.first) {
+                    ancestors.push(make_pair(p, -1));
+                    p = &(*p)->lchild;
+                }
+                else if (e.first > (*p)->key_value.first) {
+                    ancestors.push(make_pair(p, 1));
+                    p = &(*p)->rchild;
+                }
+                else
+                    break;
             }
-            // 释放待删除结点
-            delete willRemove;
+            //未找到该键，返回1代表删除失败
+            if(*p == nullptr)
+                return 1; 
+
+            //第二步：更新需要删除的结点
+            Node* WillRemove = *p;
+            if((*p)->lchild != nullptr && (*p)->rchild != nullptr) {
+                Node* temp;
+                if((*p)->balance = -1) {
+                    temp = (*p)->rchild;
+                    while(temp != nullptr && temp->lchild != nullptr) {
+                        ancestors.push(make_pair(&temp, -1));
+                        temp = temp->lchild;
+                    }
+                }
+                else {
+                    temp = (*p)->lchild;
+                    while(temp != nullptr && temp->rchild != nullptr) {
+                        ancestors.push(make_pair(&temp, 1));
+                        temp = temp->rchild;
+                    }
+                }        
+                //交换内容
+                Key a;
+                T b;
+                a = temp->key_value.first;
+                b = temp->key_value.second;
+                temp->key_value.first = (*p)->key_value.first;
+                temp->key_value.second = (*p)->key_value.second;
+                (*p)->key_value.first = a;
+                (*p)->key_value.second = b;
+                //更新要删除的结点
+                WillRemove = temp;
+            }
+            
+            //第三步：进行删除操作
+            if (WillRemove->lchild != nullptr && WillRemove->rchild == nullptr) {
+                //只含有左子树
+                Node* parent = *(ancestors.top().first)
+                if(ancestors.top().second == -1) {
+                    parent->lchild = WillRemove->lchild;
+                }
+                else {
+                    parent->rchild = WillRemove->lchild;
+                }
+            }
+            else if (WillRemove->lchild == nullptr && WillRemove->rchild != nullptr) {
+                //只含有右子树
+                Node* parent = *(ancestors.top().first)
+                if(ancestors.top().second == -1) {
+                    parent->lchild = WillRemove->rchild;
+                }
+                else {
+                    parent->rchild = WillRemove->rchild;
+                }
+            }
+            delete WillRemove;
+            number--;
+            
+            //第四步：自底向上沿祖先链修正各祖先结点的平衡因子
+            while (!ancestors.empty()) {
+                Node* A;
+                A = *(ancestors.top().first);
+                A->balance += ancestors.top().second;
+                ancestors.pop();
+                if(A->balance > 1) {
+                    Node* temp = A->lchild;
+                    if(temp->balance == 1) 
+                        LLAdjust(A);
+                    else if(temp->balance == -1)
+                        LRAdjust(A);
+                }
+                else if(A->balance == -1) {
+                    Node* temp = A->rchild;
+                    if(temp->balance == -1) 
+                        RRAdjust(A);
+                    else if(temp->balance == 1)
+                        RLAdjust(A);
+                }
+            }
             return 0;
         }
-        
+        int size() {
+            return number;
+        }
+        bool empty() {
+            return number == 0;
+        }
 };

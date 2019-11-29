@@ -1,31 +1,32 @@
+#pragma once
 #include<iostream>
 using namespace std;
 
-template<typename T>
-class stack{
-    private:
-        int capacity = 100;
-        int number = 0;
-        T buffer[100];
-    public:
-        bool empty() {
-            return number == 0;
-        }
-        int size() {
-            return number;
-        }
-        T top() {
-            return buffer[number - 1];
-        }
-        void push(T element) {
-            if(number < capacity) {
-                buffer[number] = element;
-                number++;
-            }
-            else
-                cout << "The stack is full, new element cannot be pushed." << endl;                
-        }
-        void pop() {
-            number--;
-        }
+template<class T>
+class stack {
+private:
+	int capacity;
+	int number;
+	T buffer[100];
+public:
+	stack(int c = 100) {
+		capacity = c;
+		number = 0;
+	}
+	bool empty() {
+		return number == 0;
+	}
+	int size() {
+		return number;
+	}
+	T top() {
+		return buffer[number - 1];
+	}
+	void push(T element) {
+        buffer[number] = element;
+        number++;
+	}
+	void pop() {
+		number--;
+	}
 };
