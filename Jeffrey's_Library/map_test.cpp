@@ -10,5 +10,13 @@ int main() {
 	cout << "Number of elements in map: " << m.size() << endl;
 	m.erase(23);
 	cout << "If map is empty? " << m.empty() << endl;
+	for(int i=0; i<12; i++) {
+		int n;
+		cin >> n;
+		m.insert(make_pair(n, 0));
+	}
+	for(int i=0; i<12; i++)
+		cout << m[i] << " ";
+	cout << endl;
 	return 0;
 }

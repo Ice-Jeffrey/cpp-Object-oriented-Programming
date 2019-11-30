@@ -5,25 +5,23 @@ using namespace std;
 template<class T>
 class vector {
     private:
-        int s = 0;
-        int c = 0;
+        int s;
+        int c;
         T *buffer;  //vector对应的缓冲区
     public:
         //对应的多种构造函数
-        vector() {  }
+        vector() {
+            c = 0;
+            s = 0;
+        }
         vector(vector<T>& c2) {
             buffer = new T[c2.size()];
             s = c2.size();
-            c = s;
+            c = c2.capacity();
             for(int i=0; i<s; i++) 
                 buffer[i] = c2[i];
         }
-        vector(int n) {
-            s = n;
-            c = 0;
-            buffer = new T[n];
-        }
-        vector(int n, T elem) {
+        vector(int n, T elem = 0) {
             buffer = new T[n];
             s = n;
             c = n;
@@ -44,7 +42,7 @@ class vector {
             return c;
         }
         int max_size() {
-            return s;
+            return c;
         }   //返回容器中最大数据的数量。
         bool empty() {  //返回数组是否为空
             return s == 0;
@@ -60,143 +58,65 @@ class vector {
             return buffer[index];
         }
         //其他操作
+        void reserve(int n) {
+            //为vector申请多余的内存空间
+            if(n > c) {
+                T* temp = new T[s];
+                for(int i=0; i<s; i++)
+                    temp[i] = buffer[i];
+                delete buffer;
+                buffer = new int[n];
+                for(int i=0; i<s; i++)
+                    buffer[i] = temp[i];
+                c = n;
+            }
+        }
+        void resize(int n, T element = 0) {
+            if(n < s) 
+                s = n;
+            else if(n > s && n <= c) {
+                for(int i=s; i<n; i++)
+                    buffer[i] = element;
+                s = n;
+            }
+            else if(n > c) {
+                reserve(c + c / 2);
+                for(int i=s; i<n; i++)
+                    buffer[i] = element;
+            }
+        }
         void assign(int n, T elem) {
-            buffer = new T[n];
-            s = n;
-            c = n;
+            resize(n, elem);
             for(int i=0; i<n; i++)
                 buffer[i] = elem;
         }
-        void reserve(int n) {
-            T* temp = new T[s];
-            for(int i=0; i<s; i++) 
-                temp[i] = buffer[i];
-            delete[] buffer;
-            buffer = new T[n];
-            for(int i=0; i<s; i++)
-                buffer[i] = temp[i];
-            s = n;
-        }
         void insert(int index, T element) {
-            T* temp = new T[s];
-            for(int i=0; i<s; i++) 
-                temp[i] = buffer[i];
-            delete[] buffer;
-            buffer = new T[s + 1];
-            for(int i=0; i<s; i++)
-                buffer[i] = temp[i];
             s++;
-            for(int i=c-1; i>=index; i--) 
-                buffer[i+1] = buffer[i];
+            resize(s);
+            for(int i=index; i<s-1; i++)
+                buffer[index+1] = buffer[index];
             buffer[index] = element;
         }
         void insert(int index, int n, T element) {
-            T* temp = new T[s];
-            for(int i=0; i<s; i++) 
-                temp[i] = buffer[i];
-            delete[] buffer;
-            buffer = new T[s + n];
-            for(int i=0; i<s; i++)
-                buffer[i] = temp[i];
-            s += n;
-            for(int i=c-1; i>=index; i--) 
-                buffer[i+n] = buffer[i];
             for(int i=0; i<n; i++)
-                buffer[index + i] = element;
+                insert(index, element);
         }
         void pop_back() {
-            //将已有数据进行拷贝
-            T* temp;
-            temp = new T[s-1];
-            for(int i=0; i<s-1; i++) 
-                temp[i] = buffer[i];
-            //删除旧的缓冲区并重新申请新的缓冲区
+            buffer[s-1] = 0;
             s--;
-            c--;
-            delete[] buffer;
-            buffer = new T[s];
-            //将原有数据写会并添加新数据
-            for(int i=0; i<s; i++)
-                buffer[i] = temp[i];
         }   //删除最后一个数据。
         void push_back(T elem) {
-            //将已有数据进行拷贝
-            T* temp;
-            temp = new T[s];
-            for(int i=0; i<s; i++) 
-                temp[i] = buffer[i];
-            //删除旧的缓冲区并重新申请新的缓冲区
             s++;
-            c++;
-            delete[] buffer;
-            buffer = new T[s];
-            //将原有数据写会并添加新数据
-            for(int i=0; i<s; i++)
-                buffer[i] = temp[i];
-            buffer[s - 1] = elem;
+            resize(s);
+            buffer[s-1] = elem;
         }// 在尾部加入一个数据。
         void clear() {
             delete[] buffer;
             s = 0;
             c = 0;
         }
-        void resize(int n) {
-            if(n >= s) {
-                T* temp = new T[s];
-                for(int i=0; i<s; i++) 
-                    temp[i] = buffer[i];
-                delete[] buffer;
-                buffer = new T[n];
-                for(int i=0; i<s; i++)
-                    buffer[i] = temp[i];
-                s = n;
-            } 
-            else {
-                T *temp = new T[s];
-                for(int i=0; i<n; i++) 
-                    temp[i] = buffer[i];
-                delete[] buffer;
-                buffer = new T[n];
-                s = n;
-                for (int i=0; i<n; i++) 
-                    buffer[i] = temp[i];
-            }
-        }
-        void resize(int n, T element) {
-            if(n >= s) {
-                T* temp = new T[s];
-                for(int i=0; i<s; i++) 
-                    temp[i] = buffer[i];
-                delete[] buffer;
-                buffer = new T[n];
-                for(int i=0; i<n; i++) {
-                    if(i <= s)
-                        buffer[i] = temp[i];
-                    else
-                        buffer[i] = element;                   
-                }                   
-                s = n;
-            } 
-            else {
-                T *temp = new T[n];
-                for(int i=0; i<n; i++) 
-                    temp[i] = buffer[i];
-                delete[] buffer;
-                buffer = new T[n];
-                s = n;
-                for (int i=0; i<n; i++) 
-                    buffer[i] = temp[i];
-            }
-        }
         //对下标运算符进行重载
-        T& operator[](int i)
-        {
-            if( i > s )
-            {
-                cout << "索引超过最大值" <<endl; 
-                // 返回第一个元素
-                return buffer[0];
-            }
+        T& operator[](int i) {
             return buffer[i];
         }
         //对赋值运算符进行重载
