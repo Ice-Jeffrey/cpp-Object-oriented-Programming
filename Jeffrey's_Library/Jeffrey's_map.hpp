@@ -292,7 +292,10 @@ public:
 		if (p != nullptr)
 			return p->key_value.second;
 		else {
-			return -1;
+			//当找不到当前的值时，插入新结点，并初始化键值对的值为0
+			insert(make_pair(aKey, 0));
+			p = Find(aKey);
+			return p->key_value.second;
 		}
 	}
 };
