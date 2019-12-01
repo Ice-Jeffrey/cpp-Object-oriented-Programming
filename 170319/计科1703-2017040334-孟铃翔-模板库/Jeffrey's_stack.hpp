@@ -3,32 +3,30 @@
 using namespace std;
 
 template<class T>
-class queue {
+class stack {
 private:
 	int capacity;
 	int number;
 	T buffer[100];
 public:
-	queue(int c = 100) {
-		number = 0;
+	stack(int c = 100) {
 		capacity = c;
+		number = 0;
 	}
 	bool empty() {
 		return number == 0;
 	}
-	void push(T element) {
-		buffer[number] = element;
-		number++;
-	}
-	void pop() {
-		for (int i = 0; i < number - 1; i++)
-			buffer[i] = buffer[i + 1];
-		number--;
-	}
 	int size() {
 		return number;
 	}
-	T front() {
-		return buffer[0];
+	T top() {
+		return buffer[number - 1];
+	}
+	void push(T element) {
+        buffer[number] = element;
+        number++;
+	}
+	void pop() {
+		number--;
 	}
 };
